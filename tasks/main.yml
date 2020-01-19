@@ -1,0 +1,11 @@
+- name: Check size of RAM 
+  assert:
+    that:
+      - ansible_memtotal_mb < 100001
+      - ansible_memtotal_mb > 64
+    fail_msg: "This role not being optimal for very high RAM"
+    success_msg: "System have permissible size of RAM, continue... "
+  when: ansible_virtualization_type != "lxc"
+
+- name: Include task pgtune.yml
+  include: pgtune.yml

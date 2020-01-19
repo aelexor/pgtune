@@ -1,0 +1,76 @@
+- name: Set facts to variables for web
+  set_fact:
+    pgtune_shared_buffers: "{{ ansible_memtotal_mb // 4 }}"
+    pgtune_effective_cache_size: "{{ ansible_memtotal_mb * 3 // 4 }}"
+    pgtune_maintenance_work_mem: "{{ ansible_memtotal_mb // 16 }}"
+    pgtune_checkpoint_completion_target: 0.7
+    pgtune_wal_buffers: "{{ ansible_memtotal_mb // 4 * 3 // 100 }}"
+    pgtune_default_statistics_target: 100
+    pgtune_work_mem: "{{ (((ansible_memtotal_mb - (ansible_memtotal_mb // 4)) // (pgtune_max_connection * 3)) // ansible_processor_count) * 2 }}"
+    pgtune_min_wal_size: "1GB"
+    pgtune_max_wal_size: "2GB"
+  no_log: true
+  when: pgtune_type_app == "web"
+
+- name: Set facts to variables for oltp
+  set_fact:
+    pgtune_shared_buffers: "{{ ansible_memtotal_mb // 4 }}"
+    pgtune_effective_cache_size: "{{ ansible_memtotal_mb * 3 // 4 }}"
+    pgtune_maintenance_work_mem: "{{ ansible_memtotal_mb // 16 }}"
+    pgtune_checkpoint_completion_target: 0.9
+    pgtune_wal_buffers: "{{ ansible_memtotal_mb // 4 * 3 // 100 }}"
+    pgtune_default_statistics_target: 100
+    pgtune_work_mem: "{{ (((ansible_memtotal_mb - (ansible_memtotal_mb // 4)) // (pgtune_max_connection * 3)) // ansible_processor_count) * 2 }}"
+    pgtune_min_wal_size: "2GB"
+    pgtune_max_wal_size: "4GB"
+  no_log: true
+  when: pgtune_type_app == "oltp"
+
+- name: Set facts to variables for dw
+  set_fact:
+    pgtune_shared_buffers: "{{ ansible_memtotal_mb // 4 }}"
+    pgtune_effective_cache_size: "{{ ansible_memtotal_mb * 3 // 4 }}"
+    pgtune_maintenance_work_mem: "{{ ansible_memtotal_mb // 8 }}"
+    pgtune_checkpoint_completion_target: 0.9
+    pgtune_wal_buffers: "{{ ansible_memtotal_mb // 4 * 3 // 100 }}"
+    pgtune_default_statistics_target: 500
+    pgtune_work_mem: "{{ ((ansible_memtotal_mb - (ansible_memtotal_mb // 4)) // (pgtune_max_connection * 3)) // ansible_processor_count }}"
+    pgtune_min_wal_size: "4GB"
+    pgtune_max_wal_size: "8GB"
+  no_log: true
+  when: pgtune_type_app == "dw"
+
+- name: Set facts to variables for desktop
+  set_fact:
+    pgtune_shared_buffers: "{{ ansible_memtotal_mb // 16 }}"
+    pgtune_effective_cache_size: "{{ ansible_memtotal_mb // 4 }}"
+    pgtune_maintenance_work_mem: "{{ ansible_memtotal_mb // 16 }}"
+    pgtune_checkpoint_completion_target: 0.5
+    pgtune_wal_buffers: "{{ ansible_memtotal_mb // 4 * 3 // 100 }}"
+    pgtune_default_statistics_target: 100
+    pgtune_work_mem: "{{ (((ansible_memtotal_mb - (ansible_memtotal_mb // 4)) // (pgtune_max_connection * 3)) // ansible_processor_count) // 2 }}"
+    pgtune_min_wal_size: "100MB"
+    pgtune_max_wal_size: "1GB"
+  no_log: true
+  when: pgtune_type_app == "desktop"
+
+- name: Set facts to variables for mixed
+  set_fact:
+    pgtune_shared_buffers: "{{ ansible_memtotal_mb // 4 }}"
+    pgtune_effective_cache_size: "{{ ansible_memtotal_mb * 3 // 4 }}"
+    pgtune_maintenance_work_mem: "{{ ansible_memtotal_mb // 16 }}"
+    pgtune_checkpoint_completion_target: 0.9
+    pgtune_wal_buffers: "{{ ansible_memtotal_mb // 4 * 3 // 100 }}"
+    pgtune_default_statistics_target: 100
+    pgtune_work_mem: "{{ ((ansible_memtotal_mb - (ansible_memtotal_mb // 4)) // (pgtune_max_connection * 3)) // ansible_processor_count }}"
+    pgtune_min_wal_size: "1GB"
+    pgtune_max_wal_size: "2GB"
+  no_log: true
+  when: pgtune_type_app == "mixed"
+
+- name: Copy postgresql.conf to dir
+  template:
+    src: templates/postgresql.conf
+    dest: "/etc/postgresql/{{ pgtune_postgresql_version }}/main/postgresql.conf"
+  notify:
+    - "service postgresql restart"

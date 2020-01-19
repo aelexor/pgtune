@@ -1,0 +1,6 @@
+pgtune_bind_ip: 0.0.0.0
+pgtune_bind_port: 5432
+
+pgtune_max_worker_processes: "{{ ansible_processor_count }}"
+pgtune_max_parallel_workers_per_gather: "{{ ansible_processor_count // 2 }}"
+pgtune_max_parallel_workers: "{{ ansible_processor_count }}"
