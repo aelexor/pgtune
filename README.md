@@ -31,4 +31,5 @@
 
 *pgtune_disks_type* is the type of disks. Total two type disks:
 - **SSD** is the solid-state drive
+- **SAN** is the storage area network
 - **HDD** is the hard (magnetic) disk drive
